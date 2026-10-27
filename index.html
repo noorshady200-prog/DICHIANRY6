@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>القاموس السمعي – السفر والسياحة</title>
+<style>
+:root{--bg:#fff7fa;--card:#fff;--ink:#3a2433;--pink:#e0508a;--soft:#fde1ec;--yel:#fff176;--line:#f3b9d1}
+@media (prefers-color-scheme:dark){:root{--bg:#2a1a23;--card:#3a2631;--ink:#fbeaf1;--soft:#4b2f3d;--line:#7a4a61}}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);padding:16px;max-width:980px;margin-inline:auto}
+h1{text-align:center;background:var(--yel);color:#3a2433;border:2px solid #3a2433;border-radius:10px;padding:8px 16px;width:fit-content;margin:8px auto 4px}
+.hint{text-align:center;font-size:.95rem;margin-bottom:10px}
+.bar{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:8px 0 14px}
+.bar select,.bar button{font:inherit;padding:6px 12px;border-radius:20px;border:2px solid var(--pink);background:var(--card);color:var(--ink)}
+.sec{margin:18px 0}
+.sec-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sec-h h2{margin:0;font-size:1.15rem;background:var(--yel);color:#3a2433;padding:2px 10px;border-radius:6px}
+.play{font:inherit;font-size:.85rem;cursor:pointer;background:var(--pink);color:#fff;border:0;border-radius:16px;padding:4px 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.grid.wide{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;cursor:pointer;transition:.15s}
+.card:hover{transform:translateY(-2px);border-color:var(--pink)}
+.card.on{background:var(--soft);border-color:var(--pink);box-shadow:0 0 0 3px rgba(224,80,138,.3)}
+.em{font-size:2.2rem;line-height:1.2}
+.ar{font-size:1.25rem;font-weight:700;margin-top:4px}
+.en{direction:ltr;font-size:1rem;opacity:.85;margin-top:2px}
+.mini{display:flex;gap:6px;justify-content:center;margin-top:6px}
+.mini button{cursor:pointer;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:12px;padding:2px 10px;font:inherit;font-size:.8rem}
+.warn{display:none;background:#fff3cd;color:#664d03;border-radius:8px;padding:8px;text-align:center;margin-bottom:8px}
+</style>
+</head>
+<body>
+<h1>🔊 السفر والسياحة</h1>
+<div class="hint">اضغطي على أي بطاقة لسماع الكلمة بالعربية ثم بالإنجليزية</div>
+<div class="warn" id="warn">المتصفح لا يدعم النطق الصوتي، جرّبي Chrome أو Edge أو Safari.</div>
+<div id="app"></div>
+
+<script>
+const D=[
+["مفردات","",[
+["العطلة الصيفية","Summer vacation","🏖️"],["الطائرة","Airplane","✈️"],["العائلة","Family","👨‍👩‍👧"],
+["الملابس","Clothes","👗"],["الكاميرا","Camera","📷"],["الصور","Photos","🖼️"],
+["ساعات طويلة","Long hours","⏳"],["المدينة","City","🏙️"],["القصر","Palace","🏛️"],
+["الشوارع","Streets","🛣️"],["الألوان","Colors","🎨"],["الأنوار","Lights","💡"]]],
+["أماكن سياحية","",[
+["برج خليفة","Burj Khalifa","🏙️"],["بوابة الهند","India Gate","🇮🇳"],["قصر بكنجهام","Buckingham Palace","🏰"],["برج إيفل","Eiffel Tower","🗼"],
+["متحف المستقبل","Museum of the Future","🏛️"],["القلعة الحمراء","Red Fort","🏯"],["ساعة بج بن","Big Ben","🕰️"],["متحف اللوفر","Louvre Museum","🖼️"],
+["برواز دبي","Dubai Frame","🖼️"],["تاج محل","Taj Mahal","🕌"],["عين لندن","London Eye","🎡"],["شارع الشانزليزيه","Champs-Élysées","🛍️"]]],
+["الملابس التقليدية وأشهر الأطعمة","",[
+["الكندورة","Kandura","🥼"],["الكورتا","Kurta","👘"],["الهريس","Harees","🥣"],["البرياني","Biryani","🍛"],
+["العباءة","Abaya","🧕"],["الساري","Sari","🥻"],["لقيمات","Luqaimat","🍡"],["سمبوسة","Samosa","🥟"]]],
+["الصفات","",[
+["سعيد","Happy","😊"],["صغيرة","Small","🐣"],["طويلة","Long","📏"],
+["زاهية","Bright / colorful","🌈"],["جميلة","Beautiful","🌸"],["أبيض / كبيرة","White / big","⚪"]]],
+["الأفعال","",[
+["أحمل","I carry","🎒"],["ألتقط","I take","🤲"],["أسافر","I travel","🧳"],["أزور","I visit","🚶"],["أرتدي","I wear","👚"],
+["أصل","I arrive","🛬"],["أنبهر","I am amazed","🤩"],["أرى","I see","👀"],["ألتقط صورًا","I take photos","📸"],["أكون سعيدًا","I am happy","😄"]]],
+["التراكيب","wide",[
+["أفضل السفر إلى ........","I prefer traveling to ........","💬"],
+["لا أفضل السفر إلى ........","I don’t prefer traveling to ........","💬"],
+["أحببت ........ ولم أحب ........","I liked .... and I didn’t like ....","💬"],
+["في اليوم الأول زرنا ........","On the first day, we visited ........","💬"],
+["استمتعت بـ ........","I enjoyed ........","💬"],
+["بعد ذلك التقطت ........","After that, I took ........","💬"],
+["في رأيي، ........","In my opinion, ........","💬"],
+["كان القصر ........","The palace was ........","💬"],
+["أشعر بالسعادة عندما ........","I feel happy when ........","💬"],
+["أنصح بزيارة ........","I recommend visiting ........","💬"]]],
+["أدوات الربط","",[
+["مع","With","🔗"],["إلى","To","🔗"],["في","In","🔗"],["و","And","🔗"],["بعد","After","🔗"],
+["عندما","When","🔗"],["لكن","But","🔗"],["بجانب","Beside","🔗"],["لِـ","To / for","🔗"],["جدًّا","Very","🔗"]]]
+];
+const clean=t=>t.replace(/\.{2,}/g,"… ").replace(/\//g," ");
+let voices=[],token=0;
+const syn=window.speechSynthesis;
+if(!syn)document.getElementById("warn").style.display="block";
+function load(){voices=syn?syn.getVoices():[]}
+if(syn){load();syn.onvoiceschanged=load}
+function pick(l){return voices.find(v=>v.lang.replace("_","-").toLowerCase().startsWith(l.toLowerCase()))||voices.find(v=>v.lang.toLowerCase().startsWith(l.slice(0,2)))}
+function say(text,lang){return new Promise(res=>{
+  const u=new SpeechSynthesisUtterance(clean(text));u.lang=lang;
+  const v=pick(lang);if(v)u.voice=v;
+  u.rate=0.82;
+  u.onend=u.onerror=res;syn.speak(u)})}
+async function speak(item,el,only){
+  if(!syn)return;
+  const my=++token;syn.cancel();
+  document.querySelectorAll(".card.on").forEach(c=>c.classList.remove("on"));
+  el.classList.add("on");
+  const m=only||"both";
+  if(m!=="en"){await say(item[0],"ar-SA");if(my!==token)return}
+  if(m!=="ar"){await say(item[1],"en-US");if(my!==token)return}
+  if(my===token)el.classList.remove("on");
+}
+async function playAll(list,els){
+  const my=++token;syn.cancel();
+  const m="both";
+  for(let i=0;i<list.length;i++){
+    if(my!==token)return;
+    document.querySelectorAll(".card.on").forEach(c=>c.classList.remove("on"));
+    els[i].classList.add("on");els[i].scrollIntoView({block:"nearest",behavior:"smooth"});
+    if(m!=="en"){await say(list[i][0],"ar-SA");if(my!==token)return}
+    if(m!=="ar"){await say(list[i][1],"en-US");if(my!==token)return}
+  }
+  els.forEach(e=>e.classList.remove("on"));
+}
+const app=document.getElementById("app");
+D.forEach(([title,cls,items])=>{
+  const s=document.createElement("section");s.className="sec";
+  s.innerHTML=`<div class="sec-h"><h2>${title}</h2><button class="play">▶ تشغيل الكل</button></div><div class="grid ${cls}"></div>`;
+  const g=s.querySelector(".grid"),els=[];
+  items.forEach(it=>{
+    const c=document.createElement("div");c.className="card";c.tabIndex=0;
+    c.innerHTML=`<div class="em">${it[2]}</div><div class="ar">${it[0]}</div><div class="en">${it[1]}</div>
+    <div class="mini"><button data-l="ar">🔊 عربي</button></div>`;
+    c.onclick=e=>{const b=e.target.closest("button");speak(it,c,b?b.dataset.l:null)};
+    c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();speak(it,c)}};
+    g.appendChild(c);els.push(c)});
+  s.querySelector(".play").onclick=()=>playAll(items,els);
+  app.appendChild(s)});
+</script>
+</body>
+</html>
